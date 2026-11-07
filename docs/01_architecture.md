@@ -18,36 +18,73 @@ flowchart LR
 
 ## 요청 흐름
 
-### 1. 페이지 최초 진입
+### 1. 공개 모집 페이지
 
 ```text
-GET /volunteers
+GET /
+  → Cloudflare Assets에 경로 없음
+  → Hono Worker
+  → logger
+  → secureHeaders
+  → listEventsWithCounts (D1)
+  → LandingView JSX 렌더링
+  → 200 text/html
+```
+
+### 2. 신청 제출
+
+```text
+POST /apply
+  → parseBody (all)
+  → parseApplicationForm
+  → validateApplication: 일정 존재, 모집중, 정원, 중복
+  → INSERT applications
+  → INSERT application_events
+  → 303 /apply/complete/:accessToken
+```
+
+### 3. 관리자 페이지 진입
+
+```text
+GET /admin/applications
   → Cloudflare Assets에 경로 없음
   → Hono Worker
   → logger
   → secureHeaders
   → requireAuth: 세션 쿠키 검증
-  → listVolunteers + countVolunteers (D1)
-  → Layout + VolunteersView JSX 렌더링
+  → listApplications + countApplications + listEventsWithCounts (D1)
+  → Layout + ApplicationsView JSX 렌더링
   → 200 text/html
 ```
 
-### 2. HTMX 부분 갱신
+### 4. HTMX 부분 갱신
 
 ```text
-GET /volunteers/table?q=김&status=active
+GET /admin/applications/table?q=김&status=received
   → requireAuth
   → 필터 파싱
-  → 목록 + 건수 조회
-  → VolunteerTable 파셜만 렌더링
+  → 목록 + 건수 + 일정 조회
+  → ApplicationTable 파셜만 렌더링
   → 200 text/html
-  → 브라우저가 #volunteer-table 교체
+  → 브라우저가 #application-table 교체
 ```
 
-### 3. 등록 성공
+### 5. 상태 변경과 명부 등록
 
 ```text
-POST /volunteers (HX-Request: true)
+POST /admin/applications/1/status (HX-Request: true)
+  → requireAuth
+  → status=confirmed
+  → 기존 연락처의 봉사자 검색 또는 INSERT
+  → applications.volunteer_id 저장
+  → ApplicationDetail 파셜 + HX-Trigger
+  → app.js: 신청 표 새로고침, 토스트 표시
+```
+
+### 6. 봉사자 등록
+
+```text
+POST /admin/volunteers (HX-Request: true)
   → requireAuth
   → parseBody + 검증
   → INSERT
@@ -66,20 +103,31 @@ military-dharma/
 │   ├── middleware/
 │   │   └── auth.ts               # requireAuth
 │   ├── routes/
+│   │   ├── public.tsx            # 모집 랜딩, 신청, 접수 완료
 │   │   ├── auth.tsx              # 로그인, OAuth 콜백, 로그아웃
-│   │   ├── dashboard.tsx         # 편성 현황
+│   │   ├── dashboard.tsx         # 관리자 대시보드
+│   │   ├── applications.tsx      # 신청 목록/상세/상태/CSV
+│   │   ├── schedules.tsx         # 일정별 정원 설정
 │   │   └── volunteers.tsx        # 명부 페이지 + HTMX 파셜/CRUD
 │   ├── components/
-│   │   ├── layout.tsx            # 레일, 헤더, 푸터, 페이지 헤더, 상태 배지
+│   │   ├── public-layout.tsx     # 공개 사이트 헤더/푸터
+│   │   ├── landing.tsx           # 모집 안내 본문
+│   │   ├── apply-form.tsx        # 신청 폼
+│   │   ├── apply-complete.tsx    # 접수 완료
+│   │   ├── layout.tsx            # 관리자 레일, 헤더, 푸터, 배지
 │   │   ├── login.tsx             # 로그인 화면
 │   │   ├── notice.tsx            # 404/500 안내 화면
 │   │   ├── dashboard-view.tsx    # 대시보드 본문
+│   │   ├── applications-view.tsx # 신청 목록/상세
+│   │   ├── schedules-view.tsx    # 일정·정원 설정
 │   │   ├── volunteers-view.tsx   # 명부 페이지 본문
 │   │   ├── volunteer-table.tsx   # 표 파셜
 │   │   └── volunteer-form.tsx    # 등록/수정 폼
 │   ├── lib/
 │   │   ├── session.ts            # HMAC 세션 토큰/쿠키
 │   │   ├── encoding.ts           # base64url, 랜덤 문자열
+│   │   ├── baraji.ts            # 일정, 정원, 포맷
+│   │   ├── applications.ts       # 신청 검증, 쿼리, 상태, CSV
 │   │   ├── volunteers.ts         # 검증, 쿼리, 포맷
 │   │   ├── status.ts             # 활동 상태 정의
 │   │   └── site.ts               # 사이트 이름/부제
@@ -91,7 +139,8 @@ military-dharma/
 ├── public/
 │   ├── assets/
 │   │   ├── app.css               # 빌드 결과
-│   │   ├── app.js                # 모달, 토스트, 표 갱신
+│   │   ├── app.js                # 관리자 모달, 토스트, 표 갱신
+│   │   ├── public.js             # 공개 폼 제출 상태
 │   │   └── htmx.min.js           # HTMX 2.0.11 (로컬 번들)
 │   ├── favicon.svg
 │   └── robots.txt
@@ -110,7 +159,7 @@ military-dharma/
 | `lib/` | 도메인 규칙, 검증, 쿼리, 세션, 포맷 | HTML 렌더링 |
 | `db/` | 스키마와 DB 클라이언트 | 비즈니스 규칙 |
 | `components/` | 화면 구조와 표현 | DB 접근, 쿠키 접근 |
-| `public/assets/app.js` | 브라우저 상호작용(모달/토스트/포커스) | 데이터 상태 저장 |
+| `public/assets/app.js` | 관리자 상호작용(모달/토스트/포커스) | 데이터 상태 저장 |
 
 새 기능을 추가할 때도 이 경계를 유지합니다. 라우트가 두꺼워지면 `lib/`로 도메인 로직을 옮기세요.
 

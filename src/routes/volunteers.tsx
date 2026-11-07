@@ -161,7 +161,7 @@ volunteersRoutes.post("/", async (c) => {
 
   await createVolunteer(c.env.DB, result.values);
 
-  if (!isHtmx(c)) return c.redirect("/volunteers");
+  if (!isHtmx(c)) return c.redirect("/admin/volunteers");
   return notifyChange(c, "봉사자를 등록했습니다.");
 });
 
@@ -206,7 +206,7 @@ async function updateHandler(c: Context<AppEnv>) {
 
   await updateVolunteer(c.env.DB, id, result.values);
 
-  if (!isHtmx(c)) return c.redirect("/volunteers");
+  if (!isHtmx(c)) return c.redirect("/admin/volunteers");
   return notifyChange(c, "봉사자 정보를 저장했습니다.");
 }
 
@@ -222,6 +222,6 @@ volunteersRoutes.delete("/:id", async (c) => {
 
   await deleteVolunteer(c.env.DB, id);
 
-  if (!isHtmx(c)) return c.redirect("/volunteers");
+  if (!isHtmx(c)) return c.redirect("/admin/volunteers");
   return notifyChange(c, "봉사자를 명부에서 삭제했습니다.");
 });

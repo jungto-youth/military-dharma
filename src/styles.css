@@ -4,6 +4,7 @@
   --font-sans: "IBM Plex Sans KR", "Pretendard Variable", Pretendard, -apple-system,
     BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
   --font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --font-serif: "Gowun Batang", "Nanum Myeongjo", "Apple SD Gothic Neo", serif;
 
   --color-paper: #eef0e8;
   --color-paper-soft: #f6f7f1;
@@ -77,6 +78,31 @@
       linear-gradient(to right, rgba(238, 240, 232, 0.045) 1px, transparent 1px),
       linear-gradient(to bottom, rgba(238, 240, 232, 0.04) 1px, transparent 1px);
     background-size: 76px 76px;
+  }
+
+  .public-grid {
+    background-image:
+      linear-gradient(to right, rgba(238, 240, 232, 0.05) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(238, 240, 232, 0.04) 1px, transparent 1px);
+    background-size: 64px 64px;
+    mask-image: linear-gradient(to bottom, black, transparent 92%);
+  }
+
+  .apply-form:has(input[name="type"][value="stay"]:checked) [data-type-panel="shift"],
+  .apply-form:has(input[name="type"][value="shift"]:checked) [data-type-panel="stay"] {
+    display: none;
+  }
+
+  .apply-form:has(input[name="type"][value="shift"]:checked) [data-lodging] {
+    display: none;
+  }
+
+  .membership-other {
+    display: none;
+  }
+
+  .apply-form:has(select[name="membership"] option[value="other"]:checked) .membership-other {
+    display: block;
   }
 
   .btn {

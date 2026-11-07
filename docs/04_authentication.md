@@ -131,7 +131,8 @@ ALLOWED_EMAILS="@example.com"
 
 [`src/middleware/auth.ts`](../src/middleware/auth.ts)의 `requireAuth`가 적용됩니다.
 
-- 대상: `/` 대시보드, `/volunteers/**`
+- 대상: `/admin`, `/admin/**` 전체
+- 공개: `/`, `/apply`, `/apply/complete/:token`, `/login`, `/auth/*`
 - 미로그인: `/login`으로 리다이렉트 (302)
 - 허용 목록에 없는 세션: 세션 쿠키 삭제 후 `/login?error=not_allowed`로 리다이렉트 (302)
 - HTMX 요청이면: `401` + `HX-Redirect: /login`

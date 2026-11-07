@@ -18,8 +18,8 @@ export function VolunteersView({ rows, total, q, status }: Props) {
         description="등록된 봉사자를 검색하고 활동 상태를 관리합니다."
         actions={
           <a
-            href="/volunteers/new"
-            hx-get="/volunteers/new"
+            href="/admin/volunteers/new"
+            hx-get="/admin/volunteers/new"
             hx-target="#form-slot"
             hx-swap="innerHTML"
             class="btn btn-primary"
@@ -32,7 +32,7 @@ export function VolunteersView({ rows, total, q, status }: Props) {
       <form
         id="volunteer-filters"
         class="mt-5 flex flex-col gap-3 pb-1 sm:flex-row sm:items-center"
-        hx-get="/volunteers/table"
+        hx-get="/admin/volunteers/table"
         hx-target="#volunteer-table"
         hx-swap="outerHTML"
         hx-trigger="input changed delay:250ms, change, submit"

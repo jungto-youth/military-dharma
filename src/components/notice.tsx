@@ -1,4 +1,5 @@
 import { html } from "hono/html";
+import { PUBLIC_SITE_NAME, PUBLIC_SITE_TAGLINE } from "../lib/baraji";
 import { SITE_NAME, SITE_TAGLINE } from "../lib/site";
 import { BrandMark } from "./brand";
 
@@ -6,14 +7,22 @@ export function NoticePage(props: {
   title: string;
   description: string;
   code?: string;
+  brand?: "public" | "admin";
 }) {
+  const isAdmin = props.brand === "admin";
+  const name = isAdmin ? SITE_NAME : PUBLIC_SITE_NAME;
+  const tagline = isAdmin ? SITE_TAGLINE : PUBLIC_SITE_TAGLINE;
+  const homeHref = isAdmin ? "/admin" : "/";
+  const homeLabel = isAdmin ? "편성 현황으로" : "모집 안내로";
+
   return html`<!DOCTYPE html>${(
     <html lang="ko" class="h-full">
       <head>
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <meta name="color-scheme" content="light" />
-        <title>{props.title} · {SITE_NAME}</title>
+        <meta name="robots" content="noindex, nofollow" />
+        <title>{props.title} · {name}</title>
         <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous" />
@@ -30,8 +39,8 @@ export function NoticePage(props: {
               <BrandMark class="size-7" tone="light" />
             </span>
             <div>
-              <p class="text-[15px] font-semibold tracking-tight">{SITE_NAME}</p>
-              <p class="mt-0.5 text-[11px] text-muted">{SITE_TAGLINE}</p>
+              <p class="text-[15px] font-semibold tracking-tight">{name}</p>
+              <p class="mt-0.5 text-[11px] text-muted">{tagline}</p>
             </div>
           </div>
 
@@ -41,8 +50,8 @@ export function NoticePage(props: {
             ) : null}
             <h1 class="mt-1 text-[24px] font-semibold tracking-[-0.02em]">{props.title}</h1>
             <p class="mt-3 text-sm leading-6 text-muted">{props.description}</p>
-            <a href="/" class="btn btn-primary mt-7">
-              편성 현황으로
+            <a href={homeHref} class="btn btn-primary mt-7">
+              {homeLabel}
             </a>
           </div>
         </main>

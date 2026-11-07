@@ -6,8 +6,8 @@
 | --- | --- | --- |
 | 일반 페이지 | 200 | 전체 HTML |
 | HTMX 파셜 | 200 | 조각 HTML |
-| 등록/수정/삭제 성공 (HTMX) | 204 | `HX-Trigger` 헤더 |
-| 등록/수정/삭제 성공 (일반) | 302 | `/volunteers`로 이동 |
+| 등록/수정/삭제 성공 (HTMX) | 204 또는 200 | `HX-Trigger` 헤더, 필요 시 파셜 |
+| 등록/수정/삭제 성공 (일반) | 302/303 | 목록 또는 완료 페이지로 이동 |
 | 폼 검증 실패 | 200 | 폼 HTML (오류 포함) |
 | 인증 없음 | 302 | `/login` |
 | 인증 없음 (HTMX) | 401 | `HX-Redirect: /login` |
@@ -16,7 +16,77 @@
 
 HTMX 요청 여부는 `HX-Request: true` 헤더로 판별합니다.
 
-## 전체 라우트
+## 공개 라우트
+
+| Method | Path | 인증 | 설명 |
+| --- | --- | --- | --- |
+| GET | `/` | 공개 | 2026년 11월 바라지 모집 안내 |
+| GET | `/apply` | 공개 | 신청 폼. `?type=stay\|shift`, `?event=ID` 프리필 |
+| POST | `/apply` | 공개 | 신청 제출 |
+| GET | `/apply/complete/:token` | 공개(토큰) | 접수 완료/신청 내용 확인 |
+
+### `GET /`
+
+- `listEventsWithCounts`로 일정과 활성 신청 수 조회
+- 정원, 모집 여부, 시작 시각으로 잔여 자리 계산
+- `Cache-Control: no-store`
+- 마감된 일정은 신청 링크를 숨기고 상태만 표시
+
+### `GET /apply`
+
+쿼리:
+
+| 이름 | 설명 |
+| --- | --- |
+| `type` | `stay` 또는 `shift`. 없으면 `stay` |
+| `event` | 미리 선택할 일정 ID. 모집중인 일정만 반영 |
+
+- 참여 방식에 따라 숙박형/일일 패널을 CSS `:has()`로 전환
+- `event`가 마감이면 선택하지 않음
+
+### `POST /apply`
+
+`application/x-www-form-urlencoded` 필드:
+
+| 필드 | 필수 | 설명 |
+| --- | --- | --- |
+| `type` | 예 | `stay` / `shift` |
+| `eventIds` | 예 | 일정 ID. 여러 개 가능 |
+| `name` | 예 | 이름 |
+| `phone` | 예 | 연락처 |
+| `affiliation` | 예 | 소속 |
+| `membership` | 예 | `jeonbeop` / `general` / `other` |
+| `membershipOther` | 조건부 | `membership=other`일 때 |
+| `gender` | 예 | `female` / `male` |
+| `lodging` | 조건부 | 숙박형이면 `yes` / `no` |
+| `telegram` | - | 텔레그램 ID |
+| `motivation` | - | 신청 동기 |
+| `privacy` | 예 | `on` |
+| `website` | - | 허니팟. 비어 있어야 함 |
+
+성공:
+
+- `303 /apply/complete/:accessToken`
+
+검증 실패:
+
+- `200` + 오류가 포함된 신청 폼
+- 선택한 일정과 입력값 유지
+
+추가 검증:
+
+- 일정 존재, 참여 방식 일치, 모집중, 시작 전, 정원 여유
+- 같은 연락처의 같은 일정 중복 신청 차단
+- 허니팟 필드가 채워지면 봇으로 간주
+
+### `GET /apply/complete/:token`
+
+- `access_token`으로 신청 조회
+- 없으면 404 안내
+- `Cache-Control: no-store`, `X-Robots-Tag: noindex`
+- 접수번호, 상태, 일정, 다음 안내 표시
+
+## 인증 라우트
 
 | Method | Path | 인증 | 설명 |
 | --- | --- | --- | --- |
@@ -25,132 +95,107 @@ HTMX 요청 여부는 `HX-Request: true` 헤더로 판별합니다.
 | GET | `/auth/google/callback` | 공개 | OAuth 콜백 |
 | GET | `/auth/dev` | 개발 전용 | 개발용 로그인 |
 | POST | `/auth/logout` | 공개 | 세션 쿠키 삭제 |
-| GET | `/` | 필요 | 편성 현황 |
-| GET | `/volunteers` | 필요 | 봉사자 명부 페이지 |
-| GET | `/volunteers/table` | 필요 | 명부 표 파셜 |
-| GET | `/volunteers/new` | 필요 | 등록 폼 (전체 페이지 또는 파셜) |
-| POST | `/volunteers` | 필요 | 봉사자 생성 |
-| GET | `/volunteers/:id/edit` | 필요 | 수정 폼 (전체 페이지 또는 파셜) |
-| PUT | `/volunteers/:id` | 필요 | 봉사자 수정 (HTMX) |
-| POST | `/volunteers/:id` | 필요 | 봉사자 수정 (JavaScript 없는 폼 fallback) |
-| DELETE | `/volunteers/:id` | 필요 | 봉사자 삭제 (HTMX) |
 
-`GET /volunteers/:id` 상세 페이지는 아직 없습니다. 잘못된 ID는 404입니다.
+- 로그인 성공 후 `/admin`으로 이동합니다.
+- 이미 로그인되어 있으면 `/login`은 `/admin`으로 리다이렉트합니다.
 
-## 인증 라우트
+## 관리자 라우트
 
-### `GET /login`
+모든 `/admin/*` 경로는 `requireAuth`를 적용합니다. `/admin/emails`는 추가로 `isAdmin` 검사를 합니다.
 
-- 이미 로그인되어 있고 `?error=`가 없으면 `/`로 리다이렉트
-- Google 설정이 완료되지 않았으면 설정 안내 박스 표시
-- `ALLOW_DEV_LOGIN=true`이면 개발 로그인 링크 표시
-- `?error=` 코드에 따라 메시지 표시
-- `Cache-Control: no-store` 설정
+| Method | Path | 설명 |
+| --- | --- | --- |
+| GET | `/admin` | 대시보드 |
+| GET | `/admin/applications` | 신청 목록 |
+| GET | `/admin/applications/table` | 신청 표 파셜 |
+| GET | `/admin/applications/export.csv` | CSV 내려받기 |
+| GET | `/admin/applications/:id` | 신청 상세 파셜 |
+| POST | `/admin/applications/:id/status` | 상태 변경 |
+| GET | `/admin/schedules` | 일정·정원 설정 |
+| POST | `/admin/schedules/:id` | 일정 정원/모집 상태 저장 |
+| GET | `/admin/volunteers` | 봉사자 명부 |
+| GET | `/admin/volunteers/table` | 명부 표 파셜 |
+| GET | `/admin/volunteers/new` | 등록 폼 |
+| POST | `/admin/volunteers` | 봉사자 생성 |
+| GET | `/admin/volunteers/:id/edit` | 수정 폼 |
+| PUT | `/admin/volunteers/:id` | 봉사자 수정 (HTMX) |
+| POST | `/admin/volunteers/:id` | 봉사자 수정 (폼 fallback) |
+| DELETE | `/admin/volunteers/:id` | 봉사자 삭제 |
+| GET | `/admin/emails` | 허용 이메일 관리 (관리자) |
+| POST | `/admin/emails` | 예외 이메일 추가 (관리자) |
+| DELETE | `/admin/emails/:id` | 예외 이메일 삭제 (관리자) |
 
-### `GET /auth/google`
+`GET /volunteers`는 이전 주소 호환을 위해 `/admin/volunteers`로 301 리다이렉트합니다.
 
-- 설정 누락 시 `/login?error=config`
-- `oauth_flow` 쿠키 설정 후 Google로 302
+### `GET /admin`
 
-### `GET /auth/google/callback`
+- 신청 상태별 건수와 최근 신청 5건
+- 일정별 정원/신청 인원
+- 봉사자 상태별 편성과 최근 등록 5명
 
-- `code`, `state`, `oauth_flow` 검증
-- Google 토큰 교환 및 UserInfo 조회
-- 허용 목록 통과 시 세션 쿠키 설정 후 `/`로 302
-
-### `GET /auth/dev`
-
-- `ALLOW_DEV_LOGIN !== "true"`이면 404
-- `?email=`, `?name=` 선택
-- 세션 발급 후 `/`로 302
-
-### `POST /auth/logout`
-
-- 세션 쿠키 만료
-- `/login`으로 302
-
-## 대시보드
-
-### `GET /`
-
-- 보호 라우트
-- 상태별 인원 집계, 최근 등록 5명 조회
-- `DashboardView` 렌더링
-
-## 봉사자 명부
-
-### `GET /volunteers`
+### `GET /admin/applications`
 
 쿼리:
 
 | 이름 | 설명 |
 | --- | --- |
-| `q` | 검색어. 이름/소속/전문분야/지역. 최대 80자 |
-| `status` | `active`, `standby`, `inactive` 중 하나 |
+| `q` | 이름/연락처/소속/접수번호 검색. 최대 80자 |
+| `status` | `received`, `confirmed`, `waitlist`, `cancelled` |
+| `type` | `stay`, `shift` |
+| `event` | 일정 ID |
 
-- 조건에 맞는 전체 목록과 건수 조회
-- 정렬: 활동 상태 우선, 같은 상태에서는 이름순
-- 전체 페이지 렌더링
+- 최신 접수순
+- `#application-table`이 `refresh` 이벤트를 수신해 필터 변경/상태 변경 후 갱신
 
-### `GET /volunteers/table`
+### `GET /admin/applications/:id`
 
-- `GET /volunteers`와 같은 쿼리 사용
-- 표 영역(`#volunteer-table`)만 렌더링
-- 검색/상태 필터, 저장 후 새로고침에 사용
+- `HX-Request: true`이면 상세 파셜
+- 아니면 접수번호 검색 결과 페이지로 리다이렉트
+- 상세에는 연락처, 소속, 회원구분, 성별, 숙박, 텔레그램, 일정, 동기, 동의 시각 표시
 
-### `GET /volunteers/new`
+### `POST /admin/applications/:id/status`
 
-- `HX-Request: true`이면 폼 파셜만 반환 (모달용)
-- 아니면 전체 페이지
+필드:
 
-### `POST /volunteers`
+| 이름 | 설명 |
+| --- | --- |
+| `status` | `received`, `confirmed`, `waitlist`, `cancelled` |
 
-`application/x-www-form-urlencoded` 필드:
+- `confirmed`이면 필요 시 봉사자 명부에 자동 등록
+- HTMX: 상세 파셜 + `HX-Trigger: application:changed`
+- 일반: `/admin/applications?saved=1`로 302
 
-| 필드 | 필수 | 설명 |
-| --- | --- | --- |
-| `_context` | - | `dialog` 또는 `page`. 오류 응답 형태 결정 |
-| `name` | 예 | 이름 |
-| `affiliation` | - | 소속 |
-| `rank` | - | 신분/계급 |
-| `specialty` | - | 전문분야 |
-| `region` | - | 활동지역 |
-| `phone` | - | 연락처 |
-| `email` | - | 이메일 |
-| `status` | - | 활동 상태 |
-| `joinedAt` | - | `YYYY-MM-DD` |
-| `notes` | - | 메모 |
+### `GET /admin/applications/export.csv`
 
-성공:
+- 현재 필터를 그대로 적용
+- UTF-8 BOM 포함, Excel 한글 호환
+- 수식 삽입 방지를 위해 `=`, `+`, `-`, `@`로 시작하는 값을 이스케이프
 
-- HTMX: `204` + `HX-Trigger`
-- 일반: `302 /volunteers`
+### `POST /admin/schedules/:id`
 
-검증 실패:
+필드:
 
-- HTMX: 폼 HTML 200
-- 일반: 전체 페이지 폼 HTML 200
+| 이름 | 설명 |
+| --- | --- |
+| `capacity` | 0 이상 정수. 비우려면 `unlimited` 사용 |
+| `unlimited` | `on`이면 정원 `NULL` |
+| `isOpen` | `on`이면 모집중 |
 
-### `GET /volunteers/:id/edit`
+- HTMX: `#schedules-panel` 파셜
+- 일반: `/admin/schedules?saved=1`로 302
+- 정원이 현재 신청 인원보다 적으면 경고를 표시하지만 저장은 허용
 
-- ID가 숫자가 아니거나 없으면 404
-- HTMX면 폼 파셜, 아니면 전체 페이지
+### 봉사자 명부
 
-### `PUT /volunteers/:id`
+기존 규약을 유지하며 경로만 `/admin/volunteers`로 이동했습니다.
 
-- 수정 성공 시 204 + `HX-Trigger`
-- 일반 요청은 `/volunteers`로 302
+- `GET /admin/volunteers`: 검색·상태 필터
+- `GET /admin/volunteers/table`: 표 파셜
+- `POST /admin/volunteers`: 생성
+- `PUT/POST /admin/volunteers/:id`: 수정
+- `DELETE /admin/volunteers/:id`: 삭제
 
-### `POST /volunteers/:id`
-
-- `PUT`과 같은 핸들러
-- HTML 폼은 PUT을 보낼 수 없으므로 JavaScript 없는 환경의 fallback
-
-### `DELETE /volunteers/:id`
-
-- 삭제 성공 시 204 + `HX-Trigger`
-- 일반 요청은 `/volunteers`로 302
-- 실제 삭제 전 확인은 브라우저 `hx-confirm`으로 수행
+성공 시 `HX-Trigger: {"volunteer:changed":{"message":"..."}}`를 반환합니다.
 
 ## HTMX 관련 헤더
 
@@ -158,13 +203,15 @@ HTMX 요청 여부는 `HX-Request: true` 헤더로 판별합니다.
 
 ```http
 HTTP/1.1 204 No Content
-HX-Trigger: {"volunteer:changed":{"message":"\ubd09\uc0ac\uc790\ub97c \ub4f1\ub85d\ud588\uc2b5\ub2c8\ub2e4."}}
+HX-Trigger: {"volunteer:changed":{"message":"봉사자를 등록했습니다."}}
 ```
 
-- 이벤트 이름: `volunteer:changed`
-- `detail.message`: 토스트 문구
-- 한글은 ASCII `\uXXXX`로 이스케이프
-- 수신 측: `public/assets/app.js`
+```http
+HTTP/1.1 200 OK
+HX-Trigger: {"application:changed":{"message":"홍길동 신청을 확정하고 명부에 등록했습니다."}}
+```
+
+한글 메시지는 HTTP 헤더에 안전하도록 `\uXXXX`로 이스케이프합니다.
 
 ### 인증 만료
 
@@ -173,52 +220,15 @@ HTTP/1.1 401 Unauthorized
 HX-Redirect: /login
 ```
 
-### 캐시
+### 권한 없음
 
-보호된 HTML 응답은 `Cache-Control: no-store`입니다. 로그인 페이지도 동일합니다.
-
-## curl 예시
-
-### 개발 로그인 + 세션 저장
-
-```bash
-curl -c cookies.txt http://localhost:8787/auth/dev
+```http
+HTTP/1.1 403 Forbidden
+HX-Redirect: /admin
 ```
 
-### 명부 조회
+## 캐시
 
-```bash
-curl -b cookies.txt "http://localhost:8787/volunteers?status=active"
-```
-
-### HTMX 등록
-
-```bash
-curl -b cookies.txt \
-  -H "HX-Request: true" \
-  -X POST http://localhost:8787/volunteers \
-  --data-urlencode "_context=dialog" \
-  --data-urlencode "name=홍길동" \
-  --data-urlencode "rank=예비역 대위" \
-  --data-urlencode "status=active"
-```
-
-응답은 `204`이며 `HX-Trigger` 헤더에 이벤트가 담깁니다.
-
-### 필터 파셜
-
-```bash
-curl -b cookies.txt "http://localhost:8787/volunteers/table?q=김&status=standby"
-```
-
-## 오류 화면
-
-- 404: `NoticePage`로 “페이지를 찾을 수 없습니다” 안내
-- 500: 서버 로그에 스택 출력, 사용자에게는 일반 안내
-- HTMX 404/500: 빈 본문 + 상태 코드 (불필요한 HTML swap 방지)
-
-## 관련 문서
-
-- HTMX 규약 상세: [07. HTMX 패턴](07_htmx-patterns.md)
-- 인증: [04. 인증과 권한](04_authentication.md)
-- 검증 규칙: [03. 데이터 모델](03_data-model.md)
+- 공개 모집·신청·완료 페이지: `Cache-Control: no-store`
+- 관리자 페이지: `requireAuth`가 `no-store` 설정
+- 정적 Assets: Cloudflare 기본 캐시

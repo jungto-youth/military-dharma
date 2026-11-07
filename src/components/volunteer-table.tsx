@@ -15,7 +15,7 @@ export function VolunteerTable({ rows, total, q, status }: Props) {
   return (
     <div
       id="volunteer-table"
-      hx-get="/volunteers/table"
+      hx-get="/admin/volunteers/table"
       hx-trigger="refresh"
       hx-include="#volunteer-filters"
       hx-swap="outerHTML"
@@ -27,7 +27,7 @@ export function VolunteerTable({ rows, total, q, status }: Props) {
         </p>
         {hasFilter ? (
           <a
-            href="/volunteers"
+            href="/admin/volunteers"
             class="text-[13px] text-muted underline decoration-line underline-offset-2 hover:text-ink hover:decoration-ink"
           >
             필터 초기화
@@ -87,7 +87,7 @@ export function VolunteerTable({ rows, total, q, status }: Props) {
                   <div class="flex items-center justify-end gap-3">
                     <button
                       type="button"
-                      hx-get={`/volunteers/${row.id}/edit`}
+                      hx-get={`/admin/volunteers/${row.id}/edit`}
                       hx-target="#form-slot"
                       hx-swap="innerHTML"
                       aria-label={`${row.name} 정보 수정`}
@@ -97,7 +97,7 @@ export function VolunteerTable({ rows, total, q, status }: Props) {
                     </button>
                     <button
                       type="button"
-                      hx-delete={`/volunteers/${row.id}`}
+                      hx-delete={`/admin/volunteers/${row.id}`}
                       hx-confirm={`${row.name} 봉사자를 명부에서 삭제할까요?`}
                       hx-disabled-elt="this"
                       aria-label={`${row.name} 삭제`}
@@ -125,13 +125,13 @@ export function VolunteerTable({ rows, total, q, status }: Props) {
                   </p>
                   <div class="mt-5 flex justify-center">
                     {hasFilter ? (
-                      <a href="/volunteers" class="btn btn-ghost">
+                      <a href="/admin/volunteers" class="btn btn-ghost">
                         전체 명부 보기
                       </a>
                     ) : (
                       <button
                         type="button"
-                        hx-get="/volunteers/new"
+                        hx-get="/admin/volunteers/new"
                         hx-target="#form-slot"
                         hx-swap="innerHTML"
                         class="btn btn-primary"

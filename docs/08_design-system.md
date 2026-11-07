@@ -67,10 +67,13 @@
 
 | 역할 | 글꼴 | 대체 |
 | --- | --- | --- |
-| 본문/제목 | IBM Plex Sans KR | Pretendard, 시스템 한글 폰트 |
+| 본문/관리자 제목 | IBM Plex Sans KR | Pretendard, 시스템 한글 폰트 |
+| 공개 사이트 제목/인용 | Gowun Batang | Nanum Myeongjo, 시스템 명조 |
 | 숫자/날짜/연락처/코드 | IBM Plex Mono | ui-monospace, Menlo |
 
-Google Fonts에서 400/500/600/700(산스), 400/500/600(모노)을 불러옵니다. CSP는 `fonts.googleapis.com`과 `fonts.gstatic.com`만 허용합니다.
+- 관리자 화면은 IBM Plex Sans KR 중심입니다.
+- 공개 사이트 히어로와 섹션 제목, 인용문은 Gowun Batang을 씁니다.
+- Google Fonts에서 산스 400/500/600/700, 모노 400/500/600, 명조 400/700을 불러옵니다. CSP는 `fonts.googleapis.com`과 `fonts.gstatic.com`만 허용합니다.
 
 ### 크기
 
@@ -136,8 +139,11 @@ Google Fonts에서 400/500/600/700(산스), 400/500/600(모노)을 불러옵니�
 
 | 클래스 | 설명 |
 | --- | --- |
-| `.rail` | 레일 배경 + 52px 격자 |
+| `.rail` | 관리자 레일 배경 + 52px 격자 |
 | `.login-grid` | 로그인 좌측 76px 격자 |
+| `.public-grid` | 공개 히어로 64px 격자, 아래로 페이드 |
+| `.apply-form` | 신청 폼. 참여 방식에 따라 일정 패널 전환 |
+| `.membership-other` | 회원구분이 기타일 때만 표시 |
 | `.gauge-track` | 편성 막대 위 10% 눈금 |
 
 ### 유틸리티
@@ -174,6 +180,44 @@ Tailwind 기본 유틸리티를 우선 사용합니다. 반복되는 조합만 �
 - 의미 없는 아이콘/이모지
 - 페이지마다 다른 강조색
 - 제목 위에 장식용 영문 라벨 붙이기
+
+## 공개 사이트 확장
+
+공개 모집 사이트는 “야전 편성판”의 규칙선과 모노 숫자를 유지하면서, 인쇄된 모집 공고문의 호흡을 더했습니다.
+
+- 히어로: 짙은 올리브 + 64px 격자 + 브라스 라벨
+- 큰 제목과 인용: Gowun Batang
+- 날짜·시간·잔여 자리: IBM Plex Mono
+- 섹션: 왼쪽 라벨 + 오른쪽 본문의 2단 공고문 구조
+- 일정: 숙박형은 행 목록, 일일은 5일 × 점심/저녁 달력
+- 카드 대신 규칙선과 여백으로 구분
+- 모바일: 하단 고정 신청 바, 섹션 라벨은 본문 위로 이동
+
+### 신청 폼의 CSS 상태 전환
+
+JavaScript 없이 `:has()`로 참여 방식에 따라 패널을 바꿉니다.
+
+```css
+.apply-form:has(input[name="type"][value="stay"]:checked) [data-type-panel="shift"],
+.apply-form:has(input[name="type"][value="shift"]:checked) [data-type-panel="stay"] {
+  display: none;
+}
+
+.apply-form:has(input[name="type"][value="shift"]:checked) [data-lodging] {
+  display: none;
+}
+
+.apply-form:has(select[name="membership"] option[value="other"]:checked) .membership-other {
+  display: block;
+}
+```
+
+### 공개 사이트 접근성
+
+- 라디오/체크박스는 실제 입력 요소를 사용하고 라벨 전체를 클릭 영역으로 둡니다.
+- 마감 상태는 색뿐 아니라 `모집중`, `잔여 n`, `마감` 텍스트로 표시합니다.
+- 오류는 상단 요약과 필드 아래에 함께 표시합니다.
+- 완료 페이지는 `noindex`이며 개인 링크임을 안내합니다.
 
 ## 테마 변경
 

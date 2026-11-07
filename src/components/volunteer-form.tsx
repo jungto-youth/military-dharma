@@ -11,7 +11,7 @@ type Props = {
 
 export function VolunteerForm({ values, errors = {}, volunteerId, context = "dialog" }: Props) {
   const isEdit = typeof volunteerId === "number";
-  const action = isEdit ? `/volunteers/${volunteerId}` : "/volunteers";
+  const action = isEdit ? `/admin/volunteers/${volunteerId}` : "/admin/volunteers";
 
   return (
     <form
@@ -155,7 +155,7 @@ export function VolunteerForm({ values, errors = {}, volunteerId, context = "dia
             취소
           </button>
         ) : (
-          <a href="/volunteers" class="btn btn-ghost">
+          <a href="/admin/volunteers" class="btn btn-ghost">
             명부로
           </a>
         )}

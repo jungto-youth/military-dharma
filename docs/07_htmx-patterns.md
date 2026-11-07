@@ -14,7 +14,7 @@
 
 ```html
 <form id="volunteer-filters"
-      hx-get="/volunteers/table"
+      hx-get="/admin/volunteers/table"
       hx-target="#volunteer-table"
       hx-swap="outerHTML"
       hx-trigger="input changed delay:250ms, change, submit">
@@ -34,7 +34,7 @@
 
 ```html
 <div id="volunteer-table"
-     hx-get="/volunteers/table"
+     hx-get="/admin/volunteers/table"
      hx-trigger="refresh"
      hx-include="#volunteer-filters"
      hx-swap="outerHTML">
@@ -78,14 +78,14 @@ document.body.addEventListener("volunteer:changed", function (event) {
 열기:
 
 ```html
-<a href="/volunteers/new"
-   hx-get="/volunteers/new"
+<a href="/admin/volunteers/new"
+   hx-get="/admin/volunteers/new"
    hx-target="#form-slot"
    hx-swap="innerHTML">봉사자 등록</a>
 ```
 
 - JavaScript가 있으면 HTMX가 가로채 파셜을 넣음
-- 없으면 `/volunteers/new` 전체 페이지로 이동 (progressive enhancement)
+- 없으면 `/admin/volunteers/new` 전체 페이지로 이동 (progressive enhancement)
 
 `htmx:afterSwap`에서 `#form-slot`이 갱신됐는지 확인하고 `showModal()`을 호출합니다.
 
@@ -125,13 +125,13 @@ return c.body(null, 204);
 
 `HX-Request`가 없으면:
 
-- 성공: 302 `/volunteers`
+- 성공: 302 `/admin/volunteers`
 - 실패: 전체 페이지 HTML
 
 ## 패턴 5. 삭제
 
 ```html
-<button hx-delete="/volunteers/7"
+<button hx-delete="/admin/volunteers/7"
         hx-confirm="홍길동 봉사자를 명부에서 삭제할까요?"
         hx-disabled-elt="this">삭제</button>
 ```
@@ -158,8 +158,8 @@ function isHtmx(c: Context<AppEnv>): boolean {
 }
 ```
 
-- `GET /volunteers/new`: HTMX면 폼 파셜, 아니면 전체 페이지
-- `GET /volunteers/:id/edit`: 동일
+- `GET /admin/volunteers/new`: HTMX면 폼 파셜, 아니면 전체 페이지
+- `GET /admin/volunteers/:id/edit`: 동일
 - 폼 제출 오류: `_context`와 `HX-Request`로 응답 형태 결정
 
 ## ASCII 헤더 규칙

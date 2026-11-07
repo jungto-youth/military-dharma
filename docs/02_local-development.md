@@ -44,7 +44,8 @@ npm run db:local
 npm run dev
 ```
 
-<http://localhost:8787> 으로 접속합니다. 로그인 화면에서 **개발 계정으로 계속**을 누르거나 <http://localhost:8787/auth/dev> 로 바로 이동합니다.
+- 공개 사이트: <http://localhost:8787>
+- 관리자: <http://localhost:8787/admin> 에서 로그인합니다. **개발 계정으로 계속**을 누르거나 <http://localhost:8787/auth/dev> 로 바로 이동합니다.
 
 > 현재 개발 머신의 `.dev.vars`에는 개발용 시크릿과 `ALLOW_DEV_LOGIN=true`가 설정되어 있을 수 있습니다. `.dev.vars`는 Git에 포함되지 않습니다.
 
@@ -104,6 +105,8 @@ npm run db:local
 
 ```bash
 npx wrangler d1 execute DB --local --command "SELECT id, name, status FROM volunteers"
+npx wrangler d1 execute DB --local --command "SELECT id, reference, name, status FROM applications"
+npx wrangler d1 execute DB --local --command "SELECT id, title, capacity, is_open FROM baraji_events"
 ```
 
 ## Google 로그인 설정

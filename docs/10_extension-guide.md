@@ -91,7 +91,7 @@ export const activities = sqliteTable("activities", {
 화면:
 
 - 봉사자 수정 대화상자에 “활동 일지” 섹션
-- 또는 `/volunteers/:id` 상세 페이지 신설
+- 또는 `/admin/volunteers/:id` 상세 페이지 신설
 - 대시보드에 월별 활동 시간 합계
 
 주의:
@@ -182,6 +182,45 @@ export const users = sqliteTable("users", {
 
 `ALLOWED_EMAILS`는 초기 부트스트랩용으로 유지하고, 사용자 테이블이 자리 잡으면 제거해도 됩니다.
 
+## 제안 5. 봉사자 참여 일정 (`participations`)
+
+2026년 바라지(군청년 프로그램 자원봉사) 신청폼을 기준으로 정리한 요구사항입니다. 봉사자 1명이 전일·부분 일정을 **중복 선택**하고 숙박 여부를 따로 고르는 구조라서, 현재 `volunteers` 한 테이블로는 표현할 수 없습니다. 일정은 별도 테이블로 분리합니다.
+
+```ts
+export const participations = sqliteTable("participations", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  volunteerId: integer("volunteer_id")
+    .notNull()
+    .references(() => volunteers.id, { onDelete: "cascade" }),
+  program: text("program").notNull().default(""),
+  startsAt: text("starts_at").notNull(),
+  endsAt: text("ends_at").notNull(),
+  kind: text("kind", { enum: ["full", "part"] }).notNull().default("part"),
+  lodging: integer("lodging", { mode: "boolean" }).notNull().default(false),
+  notes: text("notes").notNull().default(""),
+  createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+  updatedAt: text("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+});
+```
+
+- `program`: 행사 회차 이름. 예: `서울여행`, `행복학교`
+- `kind`: 전일(`full`) / 부분(`part`)
+- `lodging`: 숙박 신청 여부. 일정 단위로 볼지 신청 단위로 볼지는 정책 결정이 필요합니다.
+- 날짜·시간은 `YYYY-MM-DDTHH:mm` 형태의 문자열로 저장하면 타임존 영향을 피할 수 있습니다.
+
+봉사자 프로필에 함께 검토할 항목:
+
+| 신청폼 항목 | 제안 컬럼 | 비고 |
+| --- | --- | --- |
+| 회원구분 | `member_type` | `전법` / `일반` / `기타` |
+| 성별 | `gender` | 현재 스키마에 없음 |
+| 소속 | `affiliation` | 기존 컬럼 사용 |
+| 숙박 여부 | `participations.lodging` | 일정별 관리 |
+
+소속 선택지는 2026년 기준 13개입니다. 서울북부, 서울남부, 서울서부, 서울동부, 경기북부, 경기남부, 경기동부, 경기서부, 대구경북, 부산경남, 대전광주, 충청, 불교대·경전대. 회차마다 바뀔 수 있으므로 폼에 하드코딩하지 말고 코드 상수나 별도 마스터 테이블로 관리하세요.
+
+> 출처: 2026 바라지 모집 공고·신청폼 정리본(2026-11-07). [Google 폼](https://docs.google.com/forms/d/e/1FAIpQLSc1OHdO2lPN4juwsE4HnxZJPqEZF5DTJloVtI3xbOpJnHnYNw/viewform) · [Google 문서](https://docs.google.com/document/d/1d9pVV-3tyoBwhj374q-3jEmuWxOmAvVHUvkDxGKnDnQ/edit?tab=t.0)
+
 ## 페이지네이션
 
 현재는 전체 행을 렌더링합니다. 데이터가 늘면:
@@ -196,7 +235,7 @@ export const users = sqliteTable("users", {
 권장 쿼리 파라미터:
 
 ```text
-/volunteers?q=김&status=active&page=2
+/admin/volunteers?q=김&status=active&page=2
 ```
 
 `OFFSET`이 커지면 느려질 수 있으므로 정렬 키 기반 커서 페이지네이션도 고려할 수 있습니다.
@@ -232,8 +271,8 @@ export const users = sqliteTable("users", {
 
 ```ts
 await page.goto("/auth/dev");
-await page.goto("/volunteers");
-await page.locator("a[href='/volunteers/new']").click();
+await page.goto("/admin/volunteers");
+await page.locator("a[href='/admin/volunteers/new']").click();
 await page.fill("#field-name", "테스트");
 await page.click("#volunteer-form button[type='submit']");
 await expect(page.locator(".toast")).toContainText("등록했습니다");

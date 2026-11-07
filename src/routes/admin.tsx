@@ -31,7 +31,7 @@ adminRoutes.use("*", async (c, next) => {
   }
 
   if (isHtmx(c)) {
-    c.header("HX-Redirect", "/");
+    c.header("HX-Redirect", "/admin");
     return c.body(null, 403);
   }
 
@@ -40,6 +40,7 @@ adminRoutes.use("*", async (c, next) => {
       code="403"
       title="접근 권한이 없습니다"
       description="허용 이메일 관리는 관리자만 사용할 수 있습니다. 운영 담당자에게 권한을 요청하세요."
+      brand="admin"
     />,
     403,
   );

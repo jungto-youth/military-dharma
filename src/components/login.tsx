@@ -15,6 +15,7 @@ export function LoginPage({ configured, devLogin, error }: Props) {
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <meta name="color-scheme" content="light" />
+        <meta name="robots" content="noindex, nofollow" />
         <title>로그인 · {SITE_NAME}</title>
         <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -41,13 +42,13 @@ export function LoginPage({ configured, devLogin, error }: Props) {
             <div class="max-w-md">
               <div class="mb-6 h-px w-16 bg-brass/70"></div>
               <h1 class="text-[40px] leading-[1.18] font-semibold tracking-[-0.03em] xl:text-[46px]">
-                군인 전법활동
+                바라지 운영을
                 <br />
-                봉사자 명부
+                한 곳에서
               </h1>
               <p class="mt-5 max-w-sm text-sm leading-7 text-paper/65">
-                활동 상태와 소속, 연락처를 한 곳에서 관리합니다. 등록된 봉사자의 편성을
-                확인하고 필요한 정보를 빠르게 찾으세요.
+                신청 접수와 일정별 정원, 봉사자 명부를 함께 관리합니다. 접수된
+                신청을 확인하고 필요한 정보를 빠르게 찾으세요.
               </p>
             </div>
 
@@ -65,7 +66,7 @@ export function LoginPage({ configured, devLogin, error }: Props) {
 
               <h2 class="text-[22px] font-semibold tracking-[-0.02em]">로그인</h2>
               <p class="mt-2 text-sm leading-6 text-muted">
-                Google 계정으로 인증한 뒤 명부를 관리할 수 있습니다.
+                Google 계정으로 인증한 뒤 신청 접수와 명부를 관리할 수 있습니다.
               </p>
 
               {error ? (

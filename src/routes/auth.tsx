@@ -64,7 +64,7 @@ authRoutes.get("/login", async (c) => {
   const code = c.req.query("error");
   if (!code) {
     const user = await currentUser(c);
-    if (user) return c.redirect("/");
+    if (user) return c.redirect("/admin");
   }
 
   return c.html(
@@ -208,7 +208,7 @@ authRoutes.get("/auth/google/callback", async (c) => {
   );
 
   setSessionCookie(c, session);
-  return c.redirect("/");
+  return c.redirect("/admin");
 });
 
 authRoutes.get("/auth/dev", async (c) => {
@@ -220,7 +220,7 @@ authRoutes.get("/auth/dev", async (c) => {
 
   const token = await createSessionToken({ sub: "dev", email, name }, c.env.SESSION_SECRET);
   setSessionCookie(c, token);
-  return c.redirect("/");
+  return c.redirect("/admin");
 });
 
 authRoutes.post("/auth/logout", (c) => {

@@ -6,7 +6,12 @@ import { SITE_NAME, SITE_TAGLINE } from "../lib/site";
 import { STATUS_META } from "../lib/status";
 import { BrandMark } from "./brand";
 
-export type NavKey = "dashboard" | "volunteers" | "emails";
+export type NavKey =
+  | "dashboard"
+  | "applications"
+  | "schedules"
+  | "volunteers"
+  | "emails";
 
 const NAV: Array<{
   key: NavKey;
@@ -14,8 +19,10 @@ const NAV: Array<{
   label: string;
   adminOnly?: boolean;
 }> = [
-  { key: "dashboard", href: "/", label: "편성 현황" },
-  { key: "volunteers", href: "/volunteers", label: "봉사자 명부" },
+  { key: "dashboard", href: "/admin", label: "편성 현황" },
+  { key: "applications", href: "/admin/applications", label: "신청 접수" },
+  { key: "schedules", href: "/admin/schedules", label: "일정·정원" },
+  { key: "volunteers", href: "/admin/volunteers", label: "봉사자 명부" },
   { key: "emails", href: "/admin/emails", label: "허용 이메일", adminOnly: true },
 ];
 
@@ -36,6 +43,7 @@ export function Layout({ title, user, active, isAdmin = false, children }: Layou
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <meta name="color-scheme" content="light" />
+        <meta name="robots" content="noindex, nofollow" />
         <title>{title} · {SITE_NAME}</title>
         <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -52,7 +60,7 @@ export function Layout({ title, user, active, isAdmin = false, children }: Layou
         <div class="min-h-screen lg:grid lg:grid-cols-[272px_minmax(0,1fr)]">
           <aside class="rail hidden lg:sticky lg:top-0 lg:flex lg:h-screen lg:flex-col">
             <div class="border-b border-paper/15 px-6 pt-7 pb-6">
-              <a href="/" class="flex items-center gap-3">
+              <a href="/admin" class="flex items-center gap-3">
                 <span class="grid size-10 shrink-0 place-items-center border border-brass/70 text-brass">
                   <BrandMark class="size-7" />
                 </span>
@@ -104,28 +112,28 @@ export function Layout({ title, user, active, isAdmin = false, children }: Layou
           <div class="flex min-h-screen flex-col">
             <header class="bg-olive-deep text-paper lg:hidden">
               <div class="flex items-center justify-between gap-4 px-5 py-3.5">
-                <a href="/" class="flex items-center gap-2.5">
+                <a href="/admin" class="flex items-center gap-2.5">
                   <span class="grid size-8 place-items-center border border-brass/70 text-brass">
                     <BrandMark class="size-6" />
                   </span>
                   <span class="text-[14px] font-semibold tracking-tight">{SITE_NAME}</span>
                 </a>
-                <nav aria-label="주요 메뉴">
-                  <ul class="flex items-center gap-4 text-[13px]">
-                    {nav.map((item) => (
-                      <li>
-                        <a
-                          href={item.href}
-                          aria-current={active === item.key ? "page" : undefined}
-                          class={active === item.key ? "text-paper" : "text-paper/60"}
-                        >
-                          {item.label}
-                        </a>
-                      </li>
-                    ))}
-                  </ul>
-                </nav>
               </div>
+              <nav aria-label="주요 메뉴" class="border-t border-paper/10 px-5 py-2">
+                <ul class="flex items-center gap-4 overflow-x-auto text-[12px] whitespace-nowrap">
+                  {nav.map((item) => (
+                    <li class="shrink-0">
+                      <a
+                        href={item.href}
+                        aria-current={active === item.key ? "page" : undefined}
+                        class={active === item.key ? "text-paper" : "text-paper/60"}
+                      >
+                        {item.label}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </nav>
             </header>
 
             <main class="flex-1 px-5 py-7 sm:px-8 lg:px-12 lg:py-10">
