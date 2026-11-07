@@ -4,12 +4,12 @@ import type { AppEnv } from "../types";
 import { isAdminEmail, isEmailAllowed } from "../lib/access";
 import { clearSessionCookie, currentUser } from "../lib/session";
 
-function deny(c: Context<AppEnv>) {
+function deny(c: Context<AppEnv>, notAllowed = false) {
   if (c.req.header("HX-Request") === "true") {
     c.header("HX-Redirect", "/login");
     return c.body(null, 401);
   }
-  return c.redirect("/login?error=not_allowed");
+  return c.redirect(notAllowed ? "/login?error=not_allowed" : "/login");
 }
 
 export const requireAuth = createMiddleware<AppEnv>(async (c, next) => {
@@ -29,7 +29,7 @@ export const requireAuth = createMiddleware<AppEnv>(async (c, next) => {
 
   if (!allowed) {
     clearSessionCookie(c);
-    return deny(c);
+    return deny(c, true);
   }
 
   c.set("user", user);
