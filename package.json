@@ -1,0 +1,32 @@
+{
+  "name": "military-dharma",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "postinstall": "wrangler types",
+    "dev": "concurrently -k -n CSS,WORKER -c yellow,cyan \"npm:dev:css\" \"npm:dev:worker\"",
+    "dev:css": "tailwindcss -i ./src/styles.css -o ./public/assets/app.css --watch",
+    "dev:worker": "wrangler dev",
+    "build:css": "tailwindcss -i ./src/styles.css -o ./public/assets/app.css --minify",
+    "build": "npm run build:css",
+    "deploy": "npm run build && wrangler deploy",
+    "db:generate": "drizzle-kit generate",
+    "db:local": "wrangler d1 migrations apply DB --local",
+    "db:remote": "wrangler d1 migrations apply DB --remote",
+    "types": "wrangler types",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "drizzle-orm": "^0.45.4",
+    "hono": "^4.13.16"
+  },
+  "devDependencies": {
+    "@tailwindcss/cli": "^4.3.5",
+    "concurrently": "^9.2.1",
+    "drizzle-kit": "^0.31.11",
+    "tailwindcss": "^4.3.5",
+    "typescript": "^5.9.3",
+    "wrangler": "^4.158.0"
+  }
+}

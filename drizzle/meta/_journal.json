@@ -1,0 +1,20 @@
+{
+  "version": "7",
+  "dialect": "sqlite",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "6",
+      "when": 1794022159824,
+      "tag": "0000_demonic_franklin_storm",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1794030051723,
+      "tag": "0001_perfect_kingpin",
+      "breakpoints": true
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+# 구글 OAuth (https://console.cloud.google.com/apis/credentials)
+# 승인된 리디렉션 URI: http://localhost:8787/auth/google/callback
+GOOGLE_CLIENT_ID=""
+GOOGLE_CLIENT_SECRET=""
+
+# 세션 쿠키 서명 키. `openssl rand -base64 32` 로 생성하세요.
+SESSION_SECRET=""
+# 관리자 이메일 목록 (쉼표 구분). 이 목록의 사용자만 /admin/emails 에 접근할 수 있습니다.
+# 개별 이메일(user@example.com), 도메인 전체(@example.com), 전체 허용(*)을 쓸 수 있습니다.
+# 일반 사용자는 관리자 페이지에서 예외 이메일로 등록합니다.
+ALLOWED_EMAILS=""
+
+# 개발용 로그인. "true"일 때만 /auth/dev 가 열립니다. 배포 환경에서는 절대 켜지 마세요.
+ALLOW_DEV_LOGIN="false"
