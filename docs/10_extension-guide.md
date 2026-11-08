@@ -219,7 +219,18 @@ export const participations = sqliteTable("participations", {
 
 소속 선택지는 2026년 기준 13개입니다. 서울북부, 서울남부, 서울서부, 서울동부, 경기북부, 경기남부, 경기동부, 경기서부, 대구경북, 부산경남, 대전광주, 충청, 불교대·경전대. 회차마다 바뀔 수 있으므로 폼에 하드코딩하지 말고 코드 상수나 별도 마스터 테이블로 관리하세요.
 
-> 출처: 2026 바라지 모집 공고·신청폼 정리본(2026-11-07). [Google 폼](https://docs.google.com/forms/d/e/1FAIpQLSc1OHdO2lPN4juwsE4HnxZJPqEZF5DTJloVtI3xbOpJnHnYNw/viewform) · [Google 문서](https://docs.google.com/document/d/1d9pVV-3tyoBwhj374q-3jEmuWxOmAvVHUvkDxGKnDnQ/edit?tab=t.0)
+> 출처: [00. 개요의 원본 자료](00_overview.md#원본-자료)
+
+## 봉사자 명부 시트 이관
+
+2026-11-07 기준 원본 명부 시트는 비공개(401)라 내용을 확인하지 못했습니다. 권한을 받은 뒤 아래 순서로 진행합니다.
+
+1. Google 시트 → 파일 → 다운로드 → CSV 또는 xlsx
+2. 컬럼을 `volunteers` 스키마와 대조해 매핑표 작성
+3. 필요하면 `npx wrangler d1 execute DB --remote --file`용 SQL 생성
+4. 개인정보가 있으므로 내려받은 파일은 저장소에 커밋하지 않음
+
+확인할 것: 컬럼 구성, 현재 봉사자 수와 상태 구분 기준, 신청폼 응답 시트와 명부 시트가 같은 문서인지.
 
 ## 페이지네이션
 

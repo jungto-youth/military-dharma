@@ -79,6 +79,28 @@ Node.js 20 이상이 필요합니다. 로컬 개발은 Node.js + Wrangler로 진
 | [10. 확장 가이드](10_extension-guide.md) | 기능 추가 절차, 제안 스키마 |
 | [11. 문제 해결](11_troubleshooting.md) | 자주 겪는 오류와 해결 방법 |
 
+## 원본 자료
+
+2026년 11월 모집의 원본 문서입니다. 문구·정책 대조용으로만 쓰고, 현재 동작은 이 저장소의 앱과 문서를 기준으로 합니다.
+
+| 자료 | 링크 | 비고 |
+| --- | --- | --- |
+| 모집 공고 | [Google 문서](https://docs.google.com/document/d/1d9pVV-3tyoBwhj374q-3jEmuWxOmAvVHUvkDxGKnDnQ/edit?tab=t.0) | 공개 |
+| 신청 폼 | [Google 폼](https://docs.google.com/forms/d/e/1FAIpQLSc1OHdO2lPN4juwsE4HnxZJPqEZF5DTJloVtI3xbOpJnHnYNw/viewform) | 공개 |
+| 봉사자 명부 | [Google 시트](https://docs.google.com/spreadsheets/d/10C3p8DWr0vTf_lapagfL-Fa8Pi4zuPiPc9-v6cTbQIU/edit?gid=523619722) | **비공개** — 접근 권한 필요 |
+
+문의: 군전법 담당 010-6665-7601 (`src/lib/baraji.ts`의 `CONTACT_PHONE`).
+
+원본을 다시 내려받아 대조할 때:
+
+```bash
+curl -L "https://docs.google.com/document/d/<문서-ID>/export?format=txt"
+curl -L "https://docs.google.com/document/d/<문서-ID>/export?format=html"
+curl -L "https://docs.google.com/spreadsheets/d/<시트-ID>/export?format=csv&gid=<gid>"
+```
+
+> 명부 시트는 비공개이므로 시트 내보내기는 공유 설정이 "링크가 있는 모든 사용자"일 때만 동작합니다. 이관 절차는 [10. 확장 가이드](10_extension-guide.md)를 참고하세요.
+
 ## 용어
 
 | 용어 | 의미 |
