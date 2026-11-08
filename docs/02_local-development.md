@@ -83,7 +83,7 @@ npm run dev
 - 저장 위치: `.wrangler/state/v3/d1`
 - 바인딩 이름: `DB`
 - 스키마: `src/db/schema.ts`
-- 마이그레이션: `drizzle/`
+- 마이그레이션: `migrations/`
 
 스키마를 바꾼 뒤:
 

@@ -183,7 +183,7 @@ src/
     schema.ts                  # Drizzle 스키마
     client.ts
   styles.css                   # Tailwind 4 테마와 컴포넌트 스타일
-drizzle/                       # D1 마이그레이션
+migrations/                    # D1 마이그레이션
 public/
   assets/                      # htmx, 앱 스크립트, 빌드된 CSS
   favicon.svg

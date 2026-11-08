@@ -115,7 +115,7 @@ erDiagram
 | `created_at` | TEXT | NOT NULL | 생성 시각 |
 | `updated_at` | TEXT | NOT NULL | 수정 시각 |
 
-초기 일정은 `drizzle/0002_early_doorman.sql`의 INSERT로 들어갑니다. 정원은 관리자가 `/admin/schedules`에서 입력합니다.
+초기 일정은 `migrations/0002_early_doorman.sql`의 INSERT로 들어갑니다. 정원은 관리자가 `/admin/schedules`에서 입력합니다.
 
 ### 일정 판정
 
@@ -285,15 +285,15 @@ D1에서 `returning()`은 사용하지 않습니다. 삽입 후 별도 조회가
 
 1. `src/db/schema.ts` 수정
 2. `npm run db:generate`
-3. `drizzle/`에 SQL과 메타데이터 생성 확인
+3. `migrations/`에 SQL과 메타데이터 생성 확인
 4. `npm run db:local`로 로컬 적용
 5. 배포 시 `npm run db:remote`
 
 현재 마이그레이션:
 
-- `drizzle/0000_demonic_franklin_storm.sql` — `volunteers` 생성
-- `drizzle/0001_perfect_kingpin.sql` — `allowed_emails` 생성
-- `drizzle/0002_early_doorman.sql` — `baraji_events`, `applications`, `application_events` 생성 + 2026-11 일정 시드
+- `migrations/0000_demonic_franklin_storm.sql` — `volunteers` 생성
+- `migrations/0001_perfect_kingpin.sql` — `allowed_emails` 생성
+- `migrations/0002_early_doorman.sql` — `baraji_events`, `applications`, `application_events` 생성 + 2026-11 일정 시드
 
 ## 운영 시 주의
 

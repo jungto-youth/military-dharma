@@ -135,7 +135,7 @@ military-dharma/
 │   │   ├── schema.ts             # Drizzle 스키마
 │   │   └── client.ts             # D1 + Drizzle 클라이언트
 │   └── styles.css                # Tailwind 테마와 컴포넌트 클래스
-├── drizzle/                      # 생성된 마이그레이션
+├── migrations/                   # 생성된 마이그레이션
 ├── public/
 │   ├── assets/
 │   │   ├── app.css               # 빌드 결과
@@ -184,7 +184,7 @@ military-dharma/
 
 - D1은 SQLite 호환 관리형 DB입니다.
 - Drizzle로 스키마를 정의하고 `drizzle-kit`으로 SQL 마이그레이션을 생성합니다.
-- 마이그레이션은 Wrangler가 `drizzle/` 디렉터리에서 읽어 적용합니다.
+- 마이그레이션은 Wrangler가 `migrations/` 디렉터리에서 읽어 적용합니다.
 
 ### Tailwind CLI (Vite 미사용)
 

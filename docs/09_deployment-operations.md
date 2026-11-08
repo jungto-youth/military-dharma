@@ -31,7 +31,7 @@ npx wrangler d1 create military-dharma
       "binding": "DB",
       "database_name": "military-dharma",
       "database_id": "실제-UUID",
-      "migrations_dir": "./drizzle"
+      "migrations_dir": "./migrations"
     }
   ]
 }
